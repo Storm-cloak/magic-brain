@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Nav = styled.nav.attrs({
-  className: `flex justify-around items-top ma3`,
+  className: `flex justify-end items-top ma3`,
 })``;
 
 export const Text = styled.p.attrs({

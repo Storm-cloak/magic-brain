@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Tilt from "react-tilt";
 export const LogoContainer = styled.div.attrs({
-  className: `ma4 mt0`,
+  className: "ml4 mt4",
 })``;
 
 const Animation = styled(Tilt).attrs({
@@ -9,6 +9,7 @@ const Animation = styled(Tilt).attrs({
 })``;
 
 export const TiltContainer = styled(Animation)`
+  min-width: 100px;
   background: rgb(238, 174, 202);
   background: -moz-radial-gradient(
     circle,

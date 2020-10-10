@@ -5,6 +5,8 @@ import ImageLinkForm from "./components/imagelinkform/imagelinkform.component";
 import Rank from "./components/Rank/rank.component";
 import Particles from "react-particles-js";
 import FaceRecognition from "./components/facerecognition/facerecognition.component";
+import SignInForm from "./components/SignIn/Signin.component";
+import RegisterForm from "./components/Register/register.component";
 import { particleOptions } from "./utils/particleOptions";
 
 import Clarifai from "clarifai";
@@ -17,6 +19,25 @@ function App() {
   const [input, setInput] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [boxes, setBoxes] = useState([]);
+  const [route, setRoute] = useState("");
+  const [isSignedIn, setSignedIn] = useState(false);
+  const [user, setUser] = useState({
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: "",
+  });
+
+  const loadUser = (data) => {
+    setUser({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      entries: data.entries,
+      joined: data.joined,
+    });
+  };
 
   const calculateFaceLocation = (data) => {
     const clarifaiFace = data.outputs[0].data.regions;
@@ -46,26 +67,61 @@ function App() {
   const onButtonSubmit = (event) => {
     event.preventDefault();
     setImageUrl(input);
-    app.models.predict("e15d0f873e66047e579f90cf82c9882z", [input]).then(
-      function (response) {
+    app.models
+      .predict("e15d0f873e66047e579f90cf82c9882z", [input])
+      .then((response) => {
+        if (response) {
+          fetch("http://localhost:3001/image", {
+            method: "put",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: user.id,
+            }),
+          })
+            .then((response) => response.json())
+            .then((count) => {
+              setUser({ ...user, entries: count });
+            });
+        }
         displayFaceBox(calculateFaceLocation(response));
-      },
-      function (err) {
-        console.log(err);
-      }
-    );
+      })
+      .catch((err) => console.log(err));
+  };
+  const onRouteChange = (route) => {
+    if (route === "signout") {
+      setInput("");
+      setImageUrl("");
+      setSignedIn(false);
+    } else if (route === "home") {
+      setSignedIn(true);
+    }
+    setRoute(route);
   };
 
   return (
     <div className="App">
       <Particles className="particles" params={particleOptions} />
-      <Navigation />
-      <Rank />
-      <ImageLinkForm
-        onInputChange={onInputChange}
-        onButtonSubmit={onButtonSubmit}
-      />
-      <FaceRecognition boxes={boxes} imageUrl={imageUrl} />
+      <Navigation isSignedIn={isSignedIn} onRouteChange={onRouteChange} />
+      {route === "home" ? (
+        <>
+          <Rank name={user.name} entries={user.entries} />
+          <ImageLinkForm
+            onInputChange={onInputChange}
+            onButtonSubmit={onButtonSubmit}
+          />
+          <FaceRecognition boxes={boxes} imageUrl={imageUrl} />
+        </>
+      ) : route === "register" ? (
+        <RegisterForm
+          loadUser={loadUser}
+          onRouteChange={onRouteChange}
+        ></RegisterForm>
+      ) : (
+        <SignInForm
+          loadUser={loadUser}
+          onRouteChange={onRouteChange}
+        ></SignInForm>
+      )}
     </div>
   );
 }
