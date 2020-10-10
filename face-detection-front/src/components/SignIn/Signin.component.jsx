@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const SignInForm = ({ onRouteChange, loadUser }) => {
   const [emailInput, setemailInput] = useState("");
   const [passwordInput, setpasswordInput] = useState("");
-
+  const [flag, setFlag] = useState(1);
   const onEmailChange = (e) => {
     setemailInput(e.target.value);
   };
@@ -24,8 +24,11 @@ const SignInForm = ({ onRouteChange, loadUser }) => {
       .then((response) => response.json())
       .then((user) => {
         if (user.id) {
+          setFlag(1);
           loadUser(user);
           onRouteChange("home");
+        } else {
+          setFlag(0);
         }
       })
       .catch((err) => console.log(err));
@@ -64,7 +67,7 @@ const SignInForm = ({ onRouteChange, loadUser }) => {
             </fieldset>
             <div className="">
               <input
-                className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
+                className="b ph3 w-25 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
                 type="submit"
                 value="Sign in"
                 onClick={onSubmitSignIn}
@@ -80,6 +83,15 @@ const SignInForm = ({ onRouteChange, loadUser }) => {
             </div>
           </div>
         </main>
+        {flag ? null : (
+          <div className="flex items-center justify-center pa1">
+            <svg className="w1" data-icon="info" viewBox="0 0 32 32">
+              <title>info icon</title>
+              <path d="M16 0 A16 16 0 0 1 16 32 A16 16 0 0 1 16 0 M19 15 L13 15 L13 26 L19 26 z M16 6 A3 3 0 0 0 16 12 A3 3 0 0 0 16 6"></path>
+            </svg>
+            <span className="lh-title ml3">Invalid password or email.</span>
+          </div>
+        )}
       </article>
     </>
   );

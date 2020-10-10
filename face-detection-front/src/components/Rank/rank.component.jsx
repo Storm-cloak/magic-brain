@@ -5,7 +5,6 @@ const Rank = ({ name, entries }) => {
     <>
       <div className="white f3">
         {`${name},your current count of entries is..`}
-        {console.log(entries)}
       </div>
       <div className="white f1">{entries}</div>
     </>
