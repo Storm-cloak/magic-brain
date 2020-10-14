@@ -9,17 +9,11 @@ import SignInForm from "./components/SignIn/Signin.component";
 import RegisterForm from "./components/Register/register.component";
 import { particleOptions } from "./utils/particleOptions";
 
-import Clarifai from "clarifai";
-
-export const app = new Clarifai.App({
-  apiKey: "efb6075a363c4122a5b836470ef61a3f",
-});
-
 function App() {
   const [input, setInput] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [boxes, setBoxes] = useState([]);
-  const [route, setRoute] = useState("");
+  const [route, setRoute] = useState("signin");
   const [isSignedIn, setSignedIn] = useState(false);
   const [user, setUser] = useState({
     id: "",
@@ -67,8 +61,14 @@ function App() {
   const onButtonSubmit = (event) => {
     event.preventDefault();
     setImageUrl(input);
-    app.models
-      .predict("e15d0f873e66047e579f90cf82c9882z", [input])
+    fetch("http://localhost:3001/imageurl", {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input: input,
+      }),
+    })
+      .then((response) => response.json())
       .then((response) => {
         if (response) {
           fetch("http://localhost:3001/image", {
@@ -81,17 +81,21 @@ function App() {
             .then((response) => response.json())
             .then((count) => {
               setUser({ ...user, entries: count });
-            });
+            })
+            .catch(console.log);
         }
         displayFaceBox(calculateFaceLocation(response));
       })
       .catch((err) => console.log(err));
   };
+
   const onRouteChange = (route) => {
     if (route === "signout") {
+      setSignedIn(false);
       setInput("");
       setImageUrl("");
-      setSignedIn(false);
+      setBoxes([]);
+      setUser({ id: "", name: "", email: "", entries: 0, joined: "" });
     } else if (route === "home") {
       setSignedIn(true);
     }
